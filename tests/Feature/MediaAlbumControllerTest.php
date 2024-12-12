@@ -21,13 +21,11 @@ class MediaAlbumControllerTest extends TestCase
             'user_id' => $user->id
         ]);
 
-        for ($i = 0; $i < 15; $i++) {
-            $fakeFile = UploadedFile::fake()->image("image{$i}.jpg");
-
+        collect(range(0, 10))->each(function ($i) use ($mediaAlbum) {
             $mediaAlbum
-                ->addMedia($fakeFile)
+                ->addMedia(UploadedFile::fake()->image("image{$i}.jpg"))
                 ->toMediaCollection();
-        }
+        });
 
         $response = $this->getJson(route('media-album.show', ['media_album' => $mediaAlbum->id]));
 
@@ -42,9 +40,13 @@ class MediaAlbumControllerTest extends TestCase
                     ],
                 ],
                 'links',
-                'meta',
+                'meta' => [
+                    'per_page',
+                    'total'
+                ],
             ]);
 
         $this->assertCount(10, $response['data']);
+        self::assertEquals(10, $response->json('meta.per_page'));
     }
 }
