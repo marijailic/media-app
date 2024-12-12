@@ -26,4 +26,12 @@ class MediaAlbum extends Model implements HasMedia
     {
         return $this->belongsTo(User::class);
     }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(368)
+            ->height(232)
+            ->sharpen(10);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreMediaAlbumRequest;
+use App\Http\Resources\MediaAlbumResource;
 use App\Models\MediaAlbum;
 use Illuminate\Http\Request;
 
@@ -57,9 +58,13 @@ class MediaAlbumController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(MediaAlbum $mediaAlbum)
     {
-        //
+        $page = request()->input('page', 1);
+
+        $media = $mediaAlbum->media()->paginate(10, ['*'], 'page', $page);
+
+        return MediaAlbumResource::collection($media);
     }
 
     /**
