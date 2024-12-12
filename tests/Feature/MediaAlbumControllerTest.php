@@ -21,7 +21,7 @@ class MediaAlbumControllerTest extends TestCase
             'user_id' => $user->id
         ]);
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 15; $i++) {
             $fakeFile = UploadedFile::fake()->image("image{$i}.jpg");
 
             $mediaAlbum
@@ -34,14 +34,17 @@ class MediaAlbumControllerTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-            '*' => [
-                'id',
-                'thumb_url',
-                'full_url',
-            ],
-        ]);
+                'data' => [
+                    '*' => [
+                        'id',
+                        'thumb_url',
+                        'full_url',
+                    ],
+                ],
+                'links',
+                'meta',
+            ]);
 
-        $responseData = $response->json();
-        $this->assertCount(10, $responseData);
+        $this->assertCount(10, $response['data']);
     }
 }

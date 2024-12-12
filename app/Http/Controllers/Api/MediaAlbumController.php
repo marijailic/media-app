@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreMediaAlbumRequest;
+use App\Http\Resources\MediaAlbumResource;
 use App\Models\MediaAlbum;
 use Illuminate\Http\Request;
-use Inertia\Response;
 
 class MediaAlbumController extends Controller
 {
@@ -58,20 +58,13 @@ class MediaAlbumController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(MediaAlbum $mediaAlbum)
     {
-        $album = MediaAlbum::findOrFail($id);
         $page = request()->input('page', 1);
 
-        $media = $album->media()->paginate(10, ['*'], 'page', $page);
+        $media = $mediaAlbum->media()->paginate(10, ['*'], 'page', $page);
 
-        $mediaData = $media->map(fn($item) => [
-            'id' => $item->id,
-            'thumb_url' => $item->getUrl('thumb'),
-            'full_url' => $item->getUrl(),
-        ]);
-
-        return response()->json($mediaData);
+        return MediaAlbumResource::collection($media);
     }
 
     /**
