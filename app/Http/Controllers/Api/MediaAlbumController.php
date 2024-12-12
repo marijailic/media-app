@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreMediaAlbumRequest;
 use App\Models\MediaAlbum;
 use Illuminate\Http\Request;
+use Inertia\Response;
 
 class MediaAlbumController extends Controller
 {
@@ -59,7 +60,18 @@ class MediaAlbumController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $album = MediaAlbum::findOrFail($id);
+        $page = request()->input('page', 1);
+
+        $media = $album->media()->paginate(10, ['*'], 'page', $page);
+
+        $mediaData = $media->map(fn($item) => [
+            'id' => $item->id,
+            'thumb_url' => $item->getUrl('thumb'),
+            'full_url' => $item->getUrl(),
+        ]);
+
+        return response()->json($mediaData);
     }
 
     /**
