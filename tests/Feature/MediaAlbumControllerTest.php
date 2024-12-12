@@ -16,20 +16,15 @@ class MediaAlbumControllerTest extends TestCase
     {
         Storage::fake('public');
 
-        $user = User::factory()->create();
-        $mediaAlbum = MediaAlbum::factory()->create([
-            'user_id' => $user->id
-        ]);
+        $mediaAlbum = MediaAlbum::factory()->for(User::factory())->create();
 
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $mediaAlbum
                 ->addMedia(UploadedFile::fake()->image("image{$i}.jpg"))
                 ->toMediaCollection();
         }
 
-        $response = $this->getJson(route('media-album.show', ['media_album' => $mediaAlbum->id]));
-
-        $response
+        $response = $this->getJson(route('media-album.show', $mediaAlbum))
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
@@ -46,7 +41,9 @@ class MediaAlbumControllerTest extends TestCase
                 ],
             ]);
 
-        $this->assertCount(10, $response['data']);
-        self::assertEquals(10, $response->json('meta.per_page'));
+        $this->assertCount(15, $response['data']);
+
+        $page2_response = $this->getJson(route('media-album.show', [$mediaAlbum, 'page' => 2]));
+        $this->assertCount(5, $page2_response['data']);
     }
 }

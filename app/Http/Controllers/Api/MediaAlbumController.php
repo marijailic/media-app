@@ -60,11 +60,9 @@ class MediaAlbumController extends Controller
      */
     public function show(MediaAlbum $mediaAlbum)
     {
-        $page = request()->input('page', 1);
-
-        $media = $mediaAlbum->media()->paginate(10, ['*'], 'page', $page);
-
-        return MediaAlbumResource::collection($media);
+        return MediaAlbumResource::collection(
+            $mediaAlbum->media()->paginate()
+        );
     }
 
     /**
