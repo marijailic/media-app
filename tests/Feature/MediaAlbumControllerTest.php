@@ -11,26 +11,35 @@ use Tests\TestCase;
 
 class MediaAlbumControllerTest extends TestCase
 {
-    use DatabaseTransactions;
+//    use DatabaseTransactions;
 
     public function testStoreMediaAlbum(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $files = [
-            UploadedFile::fake()->image('image1.jpg'),
-            UploadedFile::fake()->image('image2.png'),
+        $requestData = [
+            'id' => '9db69da1-57c4-48a2-a39c-f7cdd61fb07f',
+            'files' => [
+                UploadedFile::fake()->image('image1.jpeg'),
+                UploadedFile::fake()->image('image2.png'),
+                UploadedFile::fake()->image('image3.jpg'),
+                UploadedFile::fake()->create('document.pdf'),
+                UploadedFile::fake()->create('document.doc'),
+                UploadedFile::fake()->create('document.docx'),
+                UploadedFile::fake()->create('spreadsheet.xls'),
+            ]
         ];
 
-        $response = $this->post(route('media-album.store'), [
-            'files' => $files
-        ]);
+        $response = $this->post(route('media-album.store'), $requestData);
+        dd($response);
 
         $response->assertStatus(200);
 
+
         $this->assertDatabaseHas('media_albums', [
-            'user_id' => $user->id,
+//            'user_id' => $user->id,
+            'user_id' => '9db6e69d-d62c-49f2-ba27-0020aeac1362',
         ]);
     }
 

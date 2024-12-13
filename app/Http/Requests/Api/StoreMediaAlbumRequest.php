@@ -14,6 +14,7 @@ class StoreMediaAlbumRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => ['required', 'uuid'],
             'files.*' => ['required', 'file', 'mimes:jpeg,png,jpg,pdf,doc,docx,xls', 'max:2048'],
         ];
     }

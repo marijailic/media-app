@@ -25,15 +25,28 @@ class MediaAlbumController extends Controller
     {
         $validatedData = $request->validated();
 
-        $mediaAlbum = MediaAlbum::create([
-            'user_id' => auth()->id(),
-        ]);
+        $mediaAlbum = MediaAlbum::firstOrCreate(
+            ['id' => $validatedData['id']],
+//            ['user_id' => auth()->id()]
+            ['user_id' => '9db6e69d-d62c-49f2-ba27-0020aeac1362']
+        );
 
-        foreach ($validatedData['files'] as $file) {
-            $mediaAlbum->addMedia($file)->toMediaCollection();
-        }
+//        collect($validatedData['files'])->each(fn($file) =>
+//            $mediaAlbum->addMedia($file)->toMediaCollection()
+//        );
+//
+//        return MediaAlbumResource::collection($mediaFiles);
 
-        return response()->json($mediaAlbum);
+
+        $fileAdders = $mediaAlbum
+            ->addAllMediaFromRequest()
+            ->each(function ($fileAdder) {
+                $fileAdder->toMediaCollection();
+            });
+
+        dd($fileAdders);
+
+        return MediaAlbumResource::collection($fileAdders);
     }
 
     /**

@@ -19,6 +19,7 @@ class MediaAlbum extends Model implements HasMedia
     use HasUuids;
 
     protected $fillable = [
+        'id',
         'user_id',
     ];
 
