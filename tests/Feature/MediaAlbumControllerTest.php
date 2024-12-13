@@ -5,21 +5,25 @@ namespace Tests\Feature;
 use App\Models\MediaAlbum;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MediaAlbumControllerTest extends TestCase
 {
-//    use DatabaseTransactions;
+    use DatabaseTransactions;
+    use WithFaker;
 
     public function testStoreMediaAlbum(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        $mediaAlbumId = $this->faker->uuid;
+
         $requestData = [
-            'id' => '9db69da1-57c4-48a2-a39c-f7cdd61fb07f',
+            'id' => $mediaAlbumId,
             'files' => [
                 UploadedFile::fake()->image('image1.jpeg'),
                 UploadedFile::fake()->image('image2.png'),
@@ -31,17 +35,25 @@ class MediaAlbumControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->post(route('media-album.store'), $requestData);
-        dd($response);
-
-        $response->assertStatus(200);
+        $this->post(route('media-album.store'), $requestData)
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'thumb_url',
+                        'full_url',
+                    ],
+                ],
+            ]);
 
 
         $this->assertDatabaseHas('media_albums', [
-//            'user_id' => $user->id,
-            'user_id' => '9db6e69d-d62c-49f2-ba27-0020aeac1362',
+            'id' => $mediaAlbumId,
         ]);
     }
+
+    // dodati jos test za fail validacije (svih validacija)
 
     public function testShowMediaAlbum(): void
     {
