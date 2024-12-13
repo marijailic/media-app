@@ -12,6 +12,28 @@ use Tests\TestCase;
 class MediaAlbumControllerTest extends TestCase
 {
     use DatabaseTransactions;
+
+    public function testStoreMediaAlbum(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $files = [
+            UploadedFile::fake()->image('image1.jpg'),
+            UploadedFile::fake()->image('image2.png'),
+        ];
+
+        $response = $this->post(route('media-album.store'), [
+            'files' => $files
+        ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('media_albums', [
+            'user_id' => $user->id,
+        ]);
+    }
+
     public function testShowMediaAlbum(): void
     {
         Storage::fake('public');
