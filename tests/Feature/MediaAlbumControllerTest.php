@@ -24,20 +24,18 @@ class MediaAlbumControllerTest extends TestCase
 
         $mediaAlbumId = $this->faker->uuid;
 
+        $fileExtensions = collect(['.jpeg', '.png', '.jpg', '.pdf', '.doc', '.docx', '.xls']);
+
+        $files = $fileExtensions->map(function ($extension) use ($fileExtensions) {
+            return UploadedFile::fake()->image('document' . $extension);
+        });
+
         $requestData = [
             'id' => $mediaAlbumId,
-            'files' => [
-                UploadedFile::fake()->image('image1.jpeg'),
-                UploadedFile::fake()->image('image2.png'),
-                UploadedFile::fake()->image('image3.jpg'),
-                UploadedFile::fake()->create('document.pdf'),
-                UploadedFile::fake()->create('document.doc'),
-                UploadedFile::fake()->create('document.docx'),
-                UploadedFile::fake()->create('spreadsheet.xls'),
-            ]
+            'files' => $files->toArray(),
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $response = $this->post(route('media-album.store'), $requestData)
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -49,13 +47,19 @@ class MediaAlbumControllerTest extends TestCase
                 ],
             ]);
 
-
         $this->assertDatabaseHas('media_albums', [
             'id' => $mediaAlbumId,
         ]);
+
+        foreach ($files as $index => $file) {
+            $this->assertStringEndsWith(
+                $file->getClientOriginalName(),
+                $response->json("data.$index.full_url")
+            );
+        }
     }
 
-    public function testStoreMediaAlbumRequiredFileValidationViolation(): void
+    public function testStoreMediaAlbumShouldFailIfFileIsNull(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -69,7 +73,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumFileValidationViolation(): void
+    public function testStoreMediaAlbumShouldFailIfProvidedFileIsNotFileType(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -83,7 +87,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumFileMimeValidationViolation(): void
+    public function testStoreMediaAlbumShouldFailIfMimeTypeIsInvalid(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -99,7 +103,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumMaxFileSizeValidationViolation(): void
+    public function testStoreMediaAlbumShouldFailIfFileExceedsMaxSize(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -112,7 +116,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumWhenAlbumExists(): void
+    public function testStoreMediaAlbumShouldStoreFileInGivenAlbumIfItExists(): void
     {
         Storage::fake('public');
 
