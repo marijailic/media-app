@@ -27,7 +27,7 @@ class MediaAlbumController extends Controller
             ['id' => $request->validated('id')],
             ['user_id' => auth()->id()]
         );
-        // TODO: napraviti validaciju ownershipa
+        // TODO:: napraviti validaciju ownershipa
 
         $media = $request->safe()->collect('files')->map(fn($file) =>
             $mediaAlbum->addMedia($file)->toMediaCollection()

@@ -55,42 +55,60 @@ class MediaAlbumControllerTest extends TestCase
         ]);
     }
 
-    public function testStoreMediaAlbumValidationViolation(): void
+    public function testStoreMediaAlbumRequiredFileValidationViolation(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $requiredViolation = [
+        $requestData = [
             'id' => $this->faker->uuid,
             'files' => [null]
         ];
 
-        $this->post(route('media-album.store'), $requiredViolation)
+        $this->post(route('media-album.store'), $requestData)
             ->assertStatus(302);
+    }
 
-        $fileViolation = [
+    public function testStoreMediaAlbumFileValidationViolation(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $requestData = [
             'id' => $this->faker->uuid,
-            'files' => [str()->random()]
+            'files' => [$this->faker->word]
         ];
 
-        $this->post(route('media-album.store'), $fileViolation)
+        $this->post(route('media-album.store'), $requestData)
             ->assertStatus(302);
+    }
 
-        $mimeViolation = [
+    public function testStoreMediaAlbumFileMimeValidationViolation(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $requestData = [
             'id' => $this->faker->uuid,
             'files' => [
                 UploadedFile::fake()->create('image.webp')
             ]
         ];
 
-        $this->post(route('media-album.store'), $mimeViolation)
+        $this->post(route('media-album.store'), $requestData)
             ->assertStatus(302);
+    }
 
-        $maxSizeViolation = [
+    public function testStoreMediaAlbumMaxFileSizeValidationViolation(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $requestData = [
             UploadedFile::fake()->create('large-file.pdf', 3072)
         ];
 
-        $this->post(route('media-album.store'), $maxSizeViolation)
+        $this->post(route('media-album.store'), $requestData)
             ->assertStatus(302);
     }
 
@@ -103,15 +121,17 @@ class MediaAlbumControllerTest extends TestCase
             ['id' => $mediaAlbumId]
         );
 
+        $file = UploadedFile::fake()->image($this->faker->word . '.jpeg');
+
         $requestData = [
             'id' => $mediaAlbumId,
-            'files' => [
-                UploadedFile::fake()->image('image.jpeg'),
-            ]
+            'files' => [$file]
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $response = $this->post(route('media-album.store'), $requestData)
             ->assertOk();
+
+        $this->assertStringEndsWith($file->getClientOriginalName(), $response->json('data.0.full_url'));
 
         $this->assertDatabaseHas('media', [
             'model_id' => $mediaAlbumId,
