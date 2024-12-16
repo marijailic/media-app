@@ -17,6 +17,8 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testStoreMediaAlbum(): void
     {
+        Storage::fake('public');
+
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -36,7 +38,7 @@ class MediaAlbumControllerTest extends TestCase
         ];
 
         $this->post(route('media-album.store'), $requestData)
-            ->assertStatus(200)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -53,7 +55,68 @@ class MediaAlbumControllerTest extends TestCase
         ]);
     }
 
-    // dodati jos test za fail validacije (svih validacija)
+    public function testStoreMediaAlbumValidationViolation(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $requiredViolation = [
+            'id' => $this->faker->uuid,
+            'files' => [null]
+        ];
+
+        $this->post(route('media-album.store'), $requiredViolation)
+            ->assertStatus(302);
+
+        $fileViolation = [
+            'id' => $this->faker->uuid,
+            'files' => [str()->random()]
+        ];
+
+        $this->post(route('media-album.store'), $fileViolation)
+            ->assertStatus(302);
+
+        $mimeViolation = [
+            'id' => $this->faker->uuid,
+            'files' => [
+                UploadedFile::fake()->create('image.webp')
+            ]
+        ];
+
+        $this->post(route('media-album.store'), $mimeViolation)
+            ->assertStatus(302);
+
+        $maxSizeViolation = [
+            UploadedFile::fake()->create('large-file.pdf', 3072)
+        ];
+
+        $this->post(route('media-album.store'), $maxSizeViolation)
+            ->assertStatus(302);
+    }
+
+    public function testStoreMediaAlbumWhenAlbumExists(): void
+    {
+        Storage::fake('public');
+
+        $mediaAlbumId = $this->faker->uuid;
+        MediaAlbum::factory()->for(User::factory())->create(
+            ['id' => $mediaAlbumId]
+        );
+
+        $requestData = [
+            'id' => $mediaAlbumId,
+            'files' => [
+                UploadedFile::fake()->image('image.jpeg'),
+            ]
+        ];
+
+        $this->post(route('media-album.store'), $requestData)
+            ->assertOk();
+
+        $this->assertDatabaseHas('media', [
+            'model_id' => $mediaAlbumId,
+        ]);
+    }
 
     public function testShowMediaAlbum(): void
     {
@@ -68,7 +131,7 @@ class MediaAlbumControllerTest extends TestCase
         }
 
         $response = $this->getJson(route('media-album.show', $mediaAlbum))
-            ->assertStatus(200)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [

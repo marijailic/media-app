@@ -24,9 +24,10 @@ class MediaAlbumController extends Controller
     public function store(StoreMediaAlbumRequest $request)
     {
         $mediaAlbum = MediaAlbum::firstOrCreate(
-            ['id' => $request->validated()['id']],
+            ['id' => $request->validated('id')],
             ['user_id' => auth()->id()]
         );
+        // TODO: napraviti validaciju ownershipa
 
         $media = $request->safe()->collect('files')->map(fn($file) =>
             $mediaAlbum->addMedia($file)->toMediaCollection()
