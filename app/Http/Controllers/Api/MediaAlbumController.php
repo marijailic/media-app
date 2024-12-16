@@ -23,36 +23,17 @@ class MediaAlbumController extends Controller
      */
     public function store(StoreMediaAlbumRequest $request)
     {
-////        dd("TEST");
-//        $validatedData = $request->validated();
-//
-//        $mediaAlbum = MediaAlbum::create([
-////            'user_id' => auth()->id(),
-//            'user_id' => '9db4a253-4e06-4219-9aaa-8f1982f91d6c',
-//        ]);
-//
-//        $uploadedMedia = [];
-//
-//        if (!empty($validatedData->files)) {
-//            foreach ($validatedData->files as $file) {
-////                dd($file);
-//                $media = $mediaAlbum->addMedia($file)->toMediaCollection();
-//                $uploadedMedia[] = [
-//                    'id' => $media->id,
-//                    'name' => $media->name,
-//                    'url' => $media->getUrl(),
-//                ];
-//            }
-//        }
-//
-//        return response()->json([
-//            'message' => 'Album and media uploaded successfully!',
-//            'album' => [
-//                'id' => $mediaAlbum->id,
-//                'name' => $mediaAlbum->name,
-//            ],
-//            'media' => $uploadedMedia,
-//        ], 201);
+        $mediaAlbum = MediaAlbum::firstOrCreate(
+            ['id' => $request->validated('id')],
+            ['user_id' => auth()->id()]
+        );
+        // TODO:: napraviti validaciju ownershipa
+
+        $media = $request->safe()->collect('files')->map(fn($file) =>
+            $mediaAlbum->addMedia($file)->toMediaCollection()
+        );
+
+        return MediaAlbumResource::collection($media);
     }
 
     /**
