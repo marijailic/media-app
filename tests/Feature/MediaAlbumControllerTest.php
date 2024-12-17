@@ -15,6 +15,45 @@ class MediaAlbumControllerTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
+    public function testIndexMediaAlbum(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $firstMediaAlbum = MediaAlbum::factory()->create([
+            'id' => $this->faker->uuid,
+            'user_id' => $user->id
+        ]);
+
+        $secondMediaAlbum = MediaAlbum::factory()->create([
+            'id' => $this->faker->uuid,
+            'user_id' => $user->id
+        ]);
+
+        $firstMediaName = $this->faker->word;
+        $firstMediaAlbum->addMedia(
+            UploadedFile::fake()->image($firstMediaName . '.jpg')
+        )->toMediaCollection();
+
+        $secondMediaName = $this->faker->word;
+        $secondMediaAlbum->addMedia(
+            UploadedFile::fake()->image($secondMediaName . '.jpg')
+        )->toMediaCollection();
+
+        $response = $this->getJson(route('media-album.index', [
+            'album_ids' => [$firstMediaAlbum->id, $secondMediaAlbum->id],
+        ]))->assertOk();
+
+        $responseAlbumIds = collect($response->json('data'))->pluck('id')->all();
+        $this->assertContains($firstMediaAlbum->id, $responseAlbumIds);
+        $this->assertContains($secondMediaAlbum->id, $responseAlbumIds);
+
+        $this->assertStringEndsWith($firstMediaName . '-thumb.jpg', $response->json('data.0.thumb_url'));
+        $this->assertStringEndsWith($secondMediaName . '-thumb.jpg', $response->json('data.1.thumb_url'));
+    }
+
     public function testStoreMediaAlbum(): void
     {
         Storage::fake('public');
