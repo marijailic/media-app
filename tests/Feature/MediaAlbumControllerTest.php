@@ -98,6 +98,32 @@ class MediaAlbumControllerTest extends TestCase
         }
     }
 
+    public function testStoreMediaAlbumShouldFailWithUnauthorizedUser(): void
+    {
+        Storage::fake('public');
+
+        $albumCreator = User::factory()->create();
+        $mediaAlbumId = $this->faker->uuid;
+
+        MediaAlbum::factory()->create([
+            'id' => $mediaAlbumId,
+            'user_id' => $albumCreator->id
+        ]);
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $requestData = [
+            'id' => $mediaAlbumId,
+            'files' => [
+                UploadedFile::fake()->image($this->faker->word . '.jpg')
+            ]
+        ];
+
+        $this->post(route('media-album.store'), $requestData)
+            ->assertStatus(403);
+    }
+
     public function testStoreMediaAlbumShouldFailIfFileIsNull(): void
     {
         $user = User::factory()->create();
@@ -159,10 +185,14 @@ class MediaAlbumControllerTest extends TestCase
     {
         Storage::fake('public');
 
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $mediaAlbumId = $this->faker->uuid;
-        MediaAlbum::factory()->for(User::factory())->create(
-            ['id' => $mediaAlbumId]
-        );
+        MediaAlbum::factory()->for(User::factory())->create([
+            'id' => $mediaAlbumId,
+            'user_id' => $user->id
+        ]);
 
         $file = UploadedFile::fake()->image($this->faker->word . '.jpeg');
 

@@ -8,9 +8,12 @@ use App\Http\Requests\Api\StoreMediaAlbumRequest;
 use App\Http\Resources\MediaAlbumResource;
 use App\Http\Resources\MediaAlbumsResource;
 use App\Models\MediaAlbum;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class MediaAlbumController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(IndexMediaAlbumRequest $request)
     {
         $mediaAlbums = MediaAlbum::whereIn('id', $request->validated('album_ids'))->get();
@@ -24,10 +27,11 @@ class MediaAlbumController extends Controller
             ['id' => $request->validated('id')],
             ['user_id' => auth()->id()]
         );
-        // TODO:: napraviti validaciju ownershipa
+
+        $this->authorize('store', $mediaAlbum);
 
         $media = $request->safe()->collect('files')->map(fn($file) =>
-            $mediaAlbum->addMedia($file)->toMediaCollection()
+        $mediaAlbum->addMedia($file)->toMediaCollection()
         );
 
         return MediaAlbumResource::collection($media);
