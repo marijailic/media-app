@@ -98,20 +98,20 @@ class MediaAlbumControllerTest extends TestCase
         }
     }
 
-    public function testStoreMediaAlbumShouldFailWithUnauthorizedUser(): void
+    public function testStoreMediaAlbumShouldFailIfUserIsNotOwner(): void
     {
         Storage::fake('public');
 
-        $albumCreator = User::factory()->create();
+        $albumOwner = User::factory()->create();
         $mediaAlbumId = $this->faker->uuid;
 
         MediaAlbum::factory()->create([
             'id' => $mediaAlbumId,
-            'user_id' => $albumCreator->id
+            'user_id' => $albumOwner->id
         ]);
 
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $authorizedUser = User::factory()->create();
+        $this->actingAs($authorizedUser);
 
         $requestData = [
             'id' => $mediaAlbumId,
@@ -215,7 +215,10 @@ class MediaAlbumControllerTest extends TestCase
     {
         Storage::fake('public');
 
-        $mediaAlbum = MediaAlbum::factory()->for(User::factory())->create();
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $mediaAlbum = MediaAlbum::factory()->for($user)->create();
 
         for ($i = 0; $i < 20; $i++) {
             $mediaAlbum

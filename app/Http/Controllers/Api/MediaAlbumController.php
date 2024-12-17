@@ -18,6 +18,8 @@ class MediaAlbumController extends Controller
     {
         $mediaAlbums = MediaAlbum::whereIn('id', $request->validated('album_ids'))->get();
 
+        $mediaAlbums->each(fn($album) => $this->authorize('ownsAlbum', $album));
+
         return MediaAlbumsResource::collection($mediaAlbums);
     }
 
@@ -28,7 +30,7 @@ class MediaAlbumController extends Controller
             ['user_id' => auth()->id()]
         );
 
-        $this->authorize('store', $mediaAlbum);
+        $this->authorize('ownsAlbum', $mediaAlbum);
 
         $media = $request->safe()->collect('files')->map(fn($file) =>
         $mediaAlbum->addMedia($file)->toMediaCollection()
@@ -39,6 +41,8 @@ class MediaAlbumController extends Controller
 
     public function show(MediaAlbum $mediaAlbum)
     {
+        $this->authorize('ownsAlbum', $mediaAlbum);
+
         return MediaAlbumResource::collection(
             $mediaAlbum->media()->paginate()
         );
@@ -46,6 +50,8 @@ class MediaAlbumController extends Controller
 
     public function destroy(MediaAlbum $mediaAlbum)
     {
+        $this->authorize('ownsAlbum', $mediaAlbum);
+
         $mediaAlbum->media()->delete();
         $mediaAlbum->delete();
 
