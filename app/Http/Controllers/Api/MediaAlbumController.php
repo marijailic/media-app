@@ -8,7 +8,6 @@ use App\Http\Requests\Api\StoreMediaAlbumRequest;
 use App\Http\Resources\MediaAlbumResource;
 use App\Http\Resources\MediaAlbumsResource;
 use App\Models\MediaAlbum;
-use Illuminate\Http\Request;
 
 class MediaAlbumController extends Controller
 {
@@ -39,11 +38,6 @@ class MediaAlbumController extends Controller
         return MediaAlbumResource::collection(
             $mediaAlbum->media()->paginate()
         );
-    }
-
-    public function update(Request $request, string $id)
-    {
-        //
     }
 
     public function destroy(MediaAlbum $mediaAlbum)
