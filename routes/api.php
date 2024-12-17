@@ -6,5 +6,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('media-album', MediaAlbumController::class)->except(['update']);
 
-Route::delete('media/{media}', [MediaController::class, 'destroy'])
-    ->name('media.destroy');
+Route::delete('media-album/{media_album}/media/{media}', [MediaAlbumController::class, 'destroyMedia'])
+    ->name('media-album.destroyMedia');
