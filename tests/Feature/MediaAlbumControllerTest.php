@@ -215,4 +215,36 @@ class MediaAlbumControllerTest extends TestCase
         $page2_response = $this->getJson(route('media-album.show', [$mediaAlbum, 'page' => 2]));
         $this->assertCount(5, $page2_response['data']);
     }
+
+    public function testDestroyMediaAlbum(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $mediaAlbum = MediaAlbum::factory()->create([
+            'id' => $this->faker->uuid,
+            'user_id' => $user->id
+        ]);
+
+        $firstMedia = $mediaAlbum->addMedia(
+            UploadedFile::fake()->image($this->faker->word . '.jpg')
+        )->toMediaCollection();
+
+        $secondMedia = $mediaAlbum->addMedia(
+            UploadedFile::fake()->image($this->faker->word . '.jpg')
+        )->toMediaCollection();
+
+        $this->assertDatabaseHas('media', ['id' => $firstMedia->id]);
+        $this->assertDatabaseHas('media', ['id' => $secondMedia->id]);
+        $this->assertDatabaseHas('media_albums', ['id' => $mediaAlbum->id]);
+
+        $this->deleteJson(route('media-album.destroy', $mediaAlbum->id))
+            ->assertOk();
+
+        $this->assertSoftDeleted('media', ['id' => $firstMedia->id]);
+        $this->assertSoftDeleted('media', ['id' => $secondMedia->id]);
+        $this->assertSoftDeleted('media_albums', ['id' => $mediaAlbum->id]);
+    }
 }

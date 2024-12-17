@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('media_albums', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignIdFor(User::class)->constrained();
-            $table->timestamps();
+        Schema::table('media', function (Blueprint $table) {
             $table->softDeletes();
         });
     }
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('media_albums');
+        Schema::table('media', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
     }
 };

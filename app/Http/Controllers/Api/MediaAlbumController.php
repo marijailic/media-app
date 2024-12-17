@@ -46,8 +46,11 @@ class MediaAlbumController extends Controller
         //
     }
 
-    public function destroy(string $id)
+    public function destroy(MediaAlbum $mediaAlbum)
     {
-        //
+        $mediaAlbum->media()->delete();
+        $mediaAlbum->delete();
+
+        return response()->noContent(200);
     }
 }
