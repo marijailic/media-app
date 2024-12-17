@@ -8,17 +8,15 @@ use App\Http\Requests\Api\StoreMediaAlbumRequest;
 use App\Http\Resources\MediaAlbumResource;
 use App\Http\Resources\MediaAlbumsResource;
 use App\Models\MediaAlbum;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Gate;
 
 class MediaAlbumController extends Controller
 {
-    use AuthorizesRequests;
-
     public function index(IndexMediaAlbumRequest $request)
     {
         $mediaAlbums = MediaAlbum::whereIn('id', $request->validated('album_ids'))->get();
 
-        $mediaAlbums->each(fn($album) => $this->authorize('ownsAlbum', $album));
+        $mediaAlbums->each(fn($album) => Gate::authorize('ownsAlbum', $album));
 
         return MediaAlbumsResource::collection($mediaAlbums);
     }
@@ -30,7 +28,7 @@ class MediaAlbumController extends Controller
             ['user_id' => auth()->id()]
         );
 
-        $this->authorize('ownsAlbum', $mediaAlbum);
+        Gate::authorize('ownsAlbum', $mediaAlbum);
 
         $media = $request->safe()->collect('files')->map(fn($file) =>
         $mediaAlbum->addMedia($file)->toMediaCollection()
@@ -41,7 +39,7 @@ class MediaAlbumController extends Controller
 
     public function show(MediaAlbum $mediaAlbum)
     {
-        $this->authorize('ownsAlbum', $mediaAlbum);
+        Gate::authorize('ownsAlbum', $mediaAlbum);
 
         return MediaAlbumResource::collection(
             $mediaAlbum->media()->paginate()
@@ -50,7 +48,7 @@ class MediaAlbumController extends Controller
 
     public function destroy(MediaAlbum $mediaAlbum)
     {
-        $this->authorize('ownsAlbum', $mediaAlbum);
+        Gate::authorize('ownsAlbum', $mediaAlbum);
 
         $mediaAlbum->media()->delete();
         $mediaAlbum->delete();
