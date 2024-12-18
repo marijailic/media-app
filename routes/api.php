@@ -5,22 +5,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(MediaAlbumController::class)->prefix('media-album')->group(function () {
 
-    Route::get('/thumbnails','getThumbnails')
+    Route::get('thumbnails','getThumbnails')
         ->name('media-album.thumbnails');
 
-    Route::post('/upload', 'upload')
+    Route::post('', 'upload')
         ->name('media-album.upload');
 
-    Route::get('/{media_album}/media', 'getAlbumMedia')
+    Route::get('{media_album}', 'getAlbumMedia')
         ->whereUuid('media_album')
         ->name('media-album.media');
 
-    Route::delete('/{media_album}', 'delete')
+    Route::delete('{media_album}', 'delete')
         ->whereUuid('media_album')
         ->name('media-album.delete');
 
-    Route::delete('/{media_album}/media/{media}', 'deleteMedia')
+    Route::delete('{media_album}/media/{media}', 'deleteMedia')
         ->whereUuid('media_album')
+        ->whereNumber('media')
         ->scopeBindings()
         ->name('media-album.delete-media');
 
