@@ -15,7 +15,9 @@ class MediaAlbumController extends Controller
 {
     public function getThumbnails(IndexMediaAlbumRequest $request)
     {
-        $mediaAlbums = MediaAlbum::whereIn('id', $request->validated('album_ids'))->get();
+        $mediaAlbums = MediaAlbum::query()
+            ->with(['media' => fn ($query) => $query->limit(1)])
+            ->whereIn('id', $request->validated('album_ids'))->get();
 
         $mediaAlbums->each(fn($album) => Gate::authorize('ownsAlbum', $album));
 
