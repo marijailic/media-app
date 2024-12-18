@@ -98,6 +98,32 @@ class MediaAlbumControllerTest extends TestCase
         }
     }
 
+    public function testStoreMediaAlbumShouldFailIfUserIsNotOwner(): void
+    {
+        Storage::fake('public');
+
+        $albumOwner = User::factory()->create();
+        $mediaAlbumId = $this->faker->uuid;
+
+        MediaAlbum::factory()->create([
+            'id' => $mediaAlbumId,
+            'user_id' => $albumOwner->id
+        ]);
+
+        $authorizedUser = User::factory()->create();
+        $this->actingAs($authorizedUser);
+
+        $requestData = [
+            'id' => $mediaAlbumId,
+            'files' => [
+                UploadedFile::fake()->image($this->faker->word . '.jpg')
+            ]
+        ];
+
+        $this->post(route('media-album.store'), $requestData)
+            ->assertStatus(403);
+    }
+
     public function testStoreMediaAlbumShouldFailIfFileIsNull(): void
     {
         $user = User::factory()->create();
@@ -159,10 +185,14 @@ class MediaAlbumControllerTest extends TestCase
     {
         Storage::fake('public');
 
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $mediaAlbumId = $this->faker->uuid;
-        MediaAlbum::factory()->for(User::factory())->create(
-            ['id' => $mediaAlbumId]
-        );
+        MediaAlbum::factory()->for(User::factory())->create([
+            'id' => $mediaAlbumId,
+            'user_id' => $user->id
+        ]);
 
         $file = UploadedFile::fake()->image($this->faker->word . '.jpeg');
 
@@ -185,7 +215,10 @@ class MediaAlbumControllerTest extends TestCase
     {
         Storage::fake('public');
 
-        $mediaAlbum = MediaAlbum::factory()->for(User::factory())->create();
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $mediaAlbum = MediaAlbum::factory()->for($user)->create();
 
         for ($i = 0; $i < 20; $i++) {
             $mediaAlbum
@@ -246,5 +279,39 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertSoftDeleted('media', ['id' => $firstMedia->id]);
         $this->assertSoftDeleted('media', ['id' => $secondMedia->id]);
         $this->assertSoftDeleted('media_albums', ['id' => $mediaAlbum->id]);
+    }
+
+    public function testDestroyMedia(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $mediaAlbum = MediaAlbum::factory()->create([
+            'id' => $this->faker->uuid,
+            'user_id' => $user->id
+        ]);
+
+        $firstMedia = $mediaAlbum->addMedia(
+            UploadedFile::fake()->image($this->faker->word . '.jpg')
+        )->toMediaCollection();
+
+        $secondMedia = $mediaAlbum->addMedia(
+            UploadedFile::fake()->image($this->faker->word . '.jpg')
+        )->toMediaCollection();
+
+        $this->assertDatabaseHas('media', ['id' => $firstMedia->id]);
+        $this->assertDatabaseHas('media', ['id' => $secondMedia->id]);
+        $this->assertDatabaseHas('media_albums', ['id' => $mediaAlbum->id]);
+
+        $this->deleteJson(route('media-album.destroyMedia', [$mediaAlbum->id, $firstMedia->id]))
+            ->assertOk();
+
+        $this->assertSoftDeleted('media', ['id' => $firstMedia->id]);
+        $this->assertNull($mediaAlbum->media()->find($firstMedia->id));
+
+        $this->assertDatabaseHas('media', ['id' => $secondMedia->id]);
+        $this->assertDatabaseHas('media_albums', ['id' => $mediaAlbum->id]);
     }
 }
