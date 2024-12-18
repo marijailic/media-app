@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
 
 class MediaAlbumController extends Controller
 {
-    public function index(IndexMediaAlbumRequest $request)
+    public function getThumbnails(IndexMediaAlbumRequest $request)
     {
         $mediaAlbums = MediaAlbum::whereIn('id', $request->validated('album_ids'))->get();
 
@@ -22,7 +22,7 @@ class MediaAlbumController extends Controller
         return MediaAlbumsResource::collection($mediaAlbums);
     }
 
-    public function store(StoreMediaAlbumRequest $request)
+    public function upload(StoreMediaAlbumRequest $request)
     {
         $mediaAlbum = MediaAlbum::firstOrCreate(
             ['id' => $request->validated('id')],
@@ -38,7 +38,7 @@ class MediaAlbumController extends Controller
         return MediaAlbumResource::collection($media);
     }
 
-    public function show(MediaAlbum $mediaAlbum)
+    public function getAlbumMedia(MediaAlbum $mediaAlbum)
     {
         Gate::authorize('ownsAlbum', $mediaAlbum);
 
@@ -47,7 +47,7 @@ class MediaAlbumController extends Controller
         );
     }
 
-    public function destroy(MediaAlbum $mediaAlbum)
+    public function delete(MediaAlbum $mediaAlbum)
     {
         Gate::authorize('ownsAlbum', $mediaAlbum);
 
@@ -57,7 +57,7 @@ class MediaAlbumController extends Controller
         return response()->noContent(200);
     }
 
-    public function destroyMedia(MediaAlbum $mediaAlbum, Media $media)
+    public function deleteMedia(MediaAlbum $mediaAlbum, Media $media)
     {
         Gate::authorize('ownsAlbum', $mediaAlbum);
 

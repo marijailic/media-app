@@ -42,7 +42,7 @@ class MediaAlbumControllerTest extends TestCase
             UploadedFile::fake()->image($secondMediaName . '.jpg')
         )->toMediaCollection();
 
-        $response = $this->getJson(route('media-album.index', [
+        $response = $this->getJson(route('media-album.thumbnails', [
             'album_ids' => [$firstMediaAlbum->id, $secondMediaAlbum->id],
         ]))->assertOk();
 
@@ -74,7 +74,7 @@ class MediaAlbumControllerTest extends TestCase
             'files' => $files->toArray(),
         ];
 
-        $response = $this->post(route('media-album.store'), $requestData)
+        $response = $this->post(route('media-album.upload'), $requestData)
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -120,7 +120,7 @@ class MediaAlbumControllerTest extends TestCase
             ]
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $this->post(route('media-album.upload'), $requestData)
             ->assertStatus(403);
     }
 
@@ -134,7 +134,7 @@ class MediaAlbumControllerTest extends TestCase
             'files' => [null]
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $this->post(route('media-album.upload'), $requestData)
             ->assertStatus(302);
     }
 
@@ -148,7 +148,7 @@ class MediaAlbumControllerTest extends TestCase
             'files' => [$this->faker->word]
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $this->post(route('media-album.upload'), $requestData)
             ->assertStatus(302);
     }
 
@@ -164,7 +164,7 @@ class MediaAlbumControllerTest extends TestCase
             ]
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $this->post(route('media-album.upload'), $requestData)
             ->assertStatus(302);
     }
 
@@ -177,7 +177,7 @@ class MediaAlbumControllerTest extends TestCase
             UploadedFile::fake()->create('large-file.pdf', 3072)
         ];
 
-        $this->post(route('media-album.store'), $requestData)
+        $this->post(route('media-album.upload'), $requestData)
             ->assertStatus(302);
     }
 
@@ -201,7 +201,7 @@ class MediaAlbumControllerTest extends TestCase
             'files' => [$file]
         ];
 
-        $response = $this->post(route('media-album.store'), $requestData)
+        $response = $this->post(route('media-album.upload'), $requestData)
             ->assertOk();
 
         $this->assertStringEndsWith($file->getClientOriginalName(), $response->json('data.0.full_url'));
@@ -226,7 +226,7 @@ class MediaAlbumControllerTest extends TestCase
                 ->toMediaCollection();
         }
 
-        $response = $this->getJson(route('media-album.show', $mediaAlbum))
+        $response = $this->getJson(route('media-album.media', $mediaAlbum))
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -245,7 +245,7 @@ class MediaAlbumControllerTest extends TestCase
 
         $this->assertCount(15, $response['data']);
 
-        $page2_response = $this->getJson(route('media-album.show', [$mediaAlbum, 'page' => 2]));
+        $page2_response = $this->getJson(route('media-album.media', [$mediaAlbum, 'page' => 2]));
         $this->assertCount(5, $page2_response['data']);
     }
 
@@ -273,7 +273,7 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertDatabaseHas('media', ['id' => $secondMedia->id]);
         $this->assertDatabaseHas('media_albums', ['id' => $mediaAlbum->id]);
 
-        $this->deleteJson(route('media-album.destroy', $mediaAlbum->id))
+        $this->deleteJson(route('media-album.delete', $mediaAlbum->id))
             ->assertOk();
 
         $this->assertSoftDeleted('media', ['id' => $firstMedia->id]);
@@ -305,7 +305,7 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertDatabaseHas('media', ['id' => $secondMedia->id]);
         $this->assertDatabaseHas('media_albums', ['id' => $mediaAlbum->id]);
 
-        $this->deleteJson(route('media-album.destroyMedia', [$mediaAlbum->id, $firstMedia->id]))
+        $this->deleteJson(route('media-album.delete-media', [$mediaAlbum->id, $firstMedia->id]))
             ->assertOk();
 
         $this->assertSoftDeleted('media', ['id' => $firstMedia->id]);
