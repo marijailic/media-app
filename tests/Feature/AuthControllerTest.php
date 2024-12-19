@@ -30,5 +30,22 @@ class AuthControllerTest extends TestCase
             ->assertJson([
                 'token_type' => 'Bearer'
             ]);
+
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+        ]);
+    }
+
+    public function testLogout(): void
+    {
+        $user = User::factory()->create();
+        $user->createToken('auth_token')->plainTextToken;
+
+        $this->actingAs($user)->post(route('auth.logout'))
+            ->assertOk();
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $user->id
+        ]);
     }
 }
