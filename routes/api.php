@@ -4,8 +4,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MediaAlbumController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::controller(MediaAlbumController::class)
     ->middleware('auth:sanctum')->prefix('media-album')->group(function () {

@@ -15,7 +15,7 @@ class MediaAlbumControllerTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    public function testIndexMediaAlbum(): void
+    public function testGetThumbnails(): void
     {
         Storage::fake('public');
 
@@ -54,7 +54,7 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertStringEndsWith($secondMediaName . '-thumb.jpg', $response->json('data.1.thumb_url'));
     }
 
-    public function testStoreMediaAlbum(): void
+    public function testUpload(): void
     {
         Storage::fake('public');
 
@@ -98,7 +98,7 @@ class MediaAlbumControllerTest extends TestCase
         }
     }
 
-    public function testStoreMediaAlbumShouldFailIfUserIsNotOwner(): void
+    public function testUploadShouldFailIfUserIsNotOwner(): void
     {
         Storage::fake('public');
 
@@ -124,7 +124,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function testStoreMediaAlbumShouldFailIfFileIsNull(): void
+    public function testUploadShouldFailIfFileIsNull(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -138,7 +138,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumShouldFailIfProvidedFileIsNotFileType(): void
+    public function testUploadShouldFailIfProvidedFileIsNotFileType(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -152,7 +152,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumShouldFailIfMimeTypeIsInvalid(): void
+    public function testUploadShouldFailIfMimeTypeIsInvalid(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -168,7 +168,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumShouldFailIfFileExceedsMaxSize(): void
+    public function testUploadShouldFailIfFileExceedsMaxSize(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -181,7 +181,7 @@ class MediaAlbumControllerTest extends TestCase
             ->assertStatus(302);
     }
 
-    public function testStoreMediaAlbumShouldStoreFileInGivenAlbumIfItExists(): void
+    public function testUploadShouldStoreFileInGivenAlbumIfItExists(): void
     {
         Storage::fake('public');
 
@@ -211,7 +211,7 @@ class MediaAlbumControllerTest extends TestCase
         ]);
     }
 
-    public function testShowMediaAlbum(): void
+    public function testGetAlbumMedia(): void
     {
         Storage::fake('public');
 
@@ -249,7 +249,7 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertCount(5, $page2_response['data']);
     }
 
-    public function testDestroyMediaAlbum(): void
+    public function testDelete(): void
     {
         Storage::fake('public');
 
@@ -281,7 +281,7 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertSoftDeleted('media_albums', ['id' => $mediaAlbum->id]);
     }
 
-    public function testDestroyMedia(): void
+    public function testDeleteMedia(): void
     {
         Storage::fake('public');
 

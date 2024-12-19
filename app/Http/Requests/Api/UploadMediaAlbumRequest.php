@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreMediaAlbumRequest extends FormRequest
+class UploadMediaAlbumRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
