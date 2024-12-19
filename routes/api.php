@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MediaAlbumController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 
 Route::controller(MediaAlbumController::class)
     ->middleware('auth:sanctum')->prefix('media-album')->group(function () {
