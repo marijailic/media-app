@@ -3,7 +3,8 @@
 use App\Http\Controllers\Api\MediaAlbumController;
 use Illuminate\Support\Facades\Route;
 
-Route::controller(MediaAlbumController::class)->prefix('media-album')->group(function () {
+Route::controller(MediaAlbumController::class)
+    ->middleware('auth:sanctum')->prefix('media-album')->group(function () {
 
     Route::get('thumbnails','getThumbnails')
         ->name('media-album.thumbnails');
