@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\IndexMediaAlbumRequest;
-use App\Http\Requests\Api\StoreMediaAlbumRequest;
+use App\Http\Requests\Api\GetThumbnailsMediaAlbumRequest;
+use App\Http\Requests\Api\UploadMediaAlbumRequest;
 use App\Http\Resources\MediaAlbumResource;
 use App\Http\Resources\MediaAlbumsResource;
 use App\Models\Media;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
 
 class MediaAlbumController extends Controller
 {
-    public function getThumbnails(IndexMediaAlbumRequest $request)
+    public function getThumbnails(GetThumbnailsMediaAlbumRequest $request)
     {
         $mediaAlbums = MediaAlbum::query()
             ->with(['media' => fn ($query) => $query->limit(1)])
@@ -24,7 +24,7 @@ class MediaAlbumController extends Controller
         return MediaAlbumsResource::collection($mediaAlbums);
     }
 
-    public function upload(StoreMediaAlbumRequest $request)
+    public function upload(UploadMediaAlbumRequest $request)
     {
         $mediaAlbum = MediaAlbum::firstOrCreate(
             ['id' => $request->validated('id')],

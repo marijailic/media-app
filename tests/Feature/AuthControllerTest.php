@@ -17,7 +17,7 @@ class AuthControllerTest extends TestCase
             'password' => $password
         ]);
 
-        $response = $this->post(route('auth.login'), [
+        $response = $this->post(route('login'), [
             'email' => $user->email,
             'password' => $password,
         ]);
@@ -41,7 +41,7 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->create();
         $user->createToken('auth_token')->plainTextToken;
 
-        $this->actingAs($user)->post(route('auth.logout'))
+        $this->actingAs($user)->post(route('logout'))
             ->assertOk();
 
         $this->assertDatabaseMissing('personal_access_tokens', [
