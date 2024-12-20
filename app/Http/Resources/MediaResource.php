@@ -5,7 +5,10 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MediaAlbumResource extends JsonResource
+/**
+ * @mixin \App\Models\Media
+ */
+class MediaResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

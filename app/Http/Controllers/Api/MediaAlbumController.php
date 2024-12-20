@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\GetThumbnailsMediaAlbumRequest;
 use App\Http\Requests\Api\UploadMediaAlbumRequest;
-use App\Http\Resources\MediaAlbumResource;
-use App\Http\Resources\MediaAlbumsResource;
+use App\Http\Resources\MediaResource;
+use App\Http\Resources\MediaThumbnailResource;
 use App\Models\Media;
 use App\Models\MediaAlbum;
 use Illuminate\Support\Facades\Gate;
@@ -19,9 +19,9 @@ class MediaAlbumController extends Controller
             ->with(['media' => fn ($query) => $query->limit(1)])
             ->whereIn('id', $request->validated('album_ids'))->get();
 
-        $mediaAlbums->each(fn($album) => Gate::authorize('ownsAlbum', $album));
+        $mediaAlbums->each(fn ($album) => Gate::authorize('ownsAlbum', $album));
 
-        return MediaAlbumsResource::collection($mediaAlbums);
+        return MediaThumbnailResource::collection($mediaAlbums);
     }
 
     public function upload(UploadMediaAlbumRequest $request)
@@ -33,18 +33,19 @@ class MediaAlbumController extends Controller
 
         Gate::authorize('ownsAlbum', $mediaAlbum);
 
-        $media = $request->safe()->collect('files')->map(fn($file) =>
+        $media = $request->safe()->collect('files')->map(
+            fn ($file) =>
         $mediaAlbum->addMedia($file)->toMediaCollection()
         );
 
-        return MediaAlbumResource::collection($media);
+        return MediaResource::collection($media);
     }
 
     public function getAlbumMedia(MediaAlbum $mediaAlbum)
     {
         Gate::authorize('ownsAlbum', $mediaAlbum);
 
-        return MediaAlbumResource::collection(
+        return MediaResource::collection(
             $mediaAlbum->media()->paginate()
         );
     }
