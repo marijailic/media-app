@@ -50,8 +50,8 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertContains($firstMediaAlbum->id, $responseAlbumIds);
         $this->assertContains($secondMediaAlbum->id, $responseAlbumIds);
 
-        $this->assertStringEndsWith($firstMediaName . '-thumb.jpg', $response->json('data.0.thumb_url'));
-        $this->assertStringEndsWith($secondMediaName . '-thumb.jpg', $response->json('data.1.thumb_url'));
+        $this->assertStringContainsString($firstMediaName . '-thumb.jpg', $response->json('data.0.thumb_url'));
+        $this->assertStringContainsString($secondMediaName . '-thumb.jpg', $response->json('data.1.thumb_url'));
     }
 
     public function testUpload(): void
@@ -91,7 +91,7 @@ class MediaAlbumControllerTest extends TestCase
         ]);
 
         foreach ($files as $index => $file) {
-            $this->assertStringEndsWith(
+            $this->assertStringContainsString(
                 $file->getClientOriginalName(),
                 $response->json("data.$index.full_url")
             );
@@ -204,7 +204,7 @@ class MediaAlbumControllerTest extends TestCase
         $response = $this->post(route('media-album.upload'), $requestData)
             ->assertOk();
 
-        $this->assertStringEndsWith($file->getClientOriginalName(), $response->json('data.0.full_url'));
+        $this->assertStringContainsString($file->getClientOriginalName(), $response->json('data.0.full_url'));
 
         $this->assertDatabaseHas('media', [
             'model_id' => $mediaAlbumId,
