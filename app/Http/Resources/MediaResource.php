@@ -21,7 +21,8 @@ class MediaResource extends JsonResource
         return [
             'id' => $this->id,
             'thumb_url' => $this->getTemporaryUrl(
-                Carbon::now()->addMinutes(5), 'thumb'
+                Carbon::now()->addMinutes(5),
+                'thumb'
             ),
             'full_url' => $this->getTemporaryUrl(
                 Carbon::now()->addMinutes(5)
