@@ -17,7 +17,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testGetThumbnails(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -56,7 +56,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testUpload(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -100,7 +100,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testUploadShouldFailIfUserIsNotOwner(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $albumOwner = User::factory()->create();
         $mediaAlbumId = $this->faker->uuid;
@@ -183,7 +183,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testUploadShouldStoreFileInGivenAlbumIfItExists(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -213,7 +213,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testGetAlbumMedia(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -251,7 +251,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testDelete(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -283,7 +283,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testDeleteMedia(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
