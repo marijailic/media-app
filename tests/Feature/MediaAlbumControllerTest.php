@@ -17,7 +17,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testGetThumbnails(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -50,13 +50,13 @@ class MediaAlbumControllerTest extends TestCase
         $this->assertContains($firstMediaAlbum->id, $responseAlbumIds);
         $this->assertContains($secondMediaAlbum->id, $responseAlbumIds);
 
-        $this->assertStringEndsWith($firstMediaName . '-thumb.jpg', $response->json('data.0.thumb_url'));
-        $this->assertStringEndsWith($secondMediaName . '-thumb.jpg', $response->json('data.1.thumb_url'));
+        $this->assertStringContainsString($firstMediaName . '-thumb.jpg', $response->json('data.0.thumb_url'));
+        $this->assertStringContainsString($secondMediaName . '-thumb.jpg', $response->json('data.1.thumb_url'));
     }
 
     public function testUpload(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -91,7 +91,7 @@ class MediaAlbumControllerTest extends TestCase
         ]);
 
         foreach ($files as $index => $file) {
-            $this->assertStringEndsWith(
+            $this->assertStringContainsString(
                 $file->getClientOriginalName(),
                 $response->json("data.$index.full_url")
             );
@@ -100,7 +100,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testUploadShouldFailIfUserIsNotOwner(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $albumOwner = User::factory()->create();
         $mediaAlbumId = $this->faker->uuid;
@@ -183,7 +183,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testUploadShouldStoreFileInGivenAlbumIfItExists(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -204,7 +204,7 @@ class MediaAlbumControllerTest extends TestCase
         $response = $this->post(route('media-album.upload'), $requestData)
             ->assertOk();
 
-        $this->assertStringEndsWith($file->getClientOriginalName(), $response->json('data.0.full_url'));
+        $this->assertStringContainsString($file->getClientOriginalName(), $response->json('data.0.full_url'));
 
         $this->assertDatabaseHas('media', [
             'model_id' => $mediaAlbumId,
@@ -213,7 +213,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testGetAlbumMedia(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -251,7 +251,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testDelete(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -283,7 +283,7 @@ class MediaAlbumControllerTest extends TestCase
 
     public function testDeleteMedia(): void
     {
-        Storage::fake('public');
+        Storage::fake(env('MEDIA_DISK'));
 
         $user = User::factory()->create();
         $this->actingAs($user);
